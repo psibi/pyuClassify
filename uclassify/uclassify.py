@@ -134,10 +134,81 @@ class uclassify:
                 raise uClassifyError(text,status_code)
         else:
             raise uClassifyError("Bad XML Request Sent")
+
+    def classify(self,texts,classifierName,username = None):
+        """Performs classification on texts.
+           :param texts: (required) A List of texts that needs to be classified.
+           :param classifierName: (required) Classifier Name
+           :param username: (optional): Name of the user, under whom the classifier exists.
+        """
+        doc,root_element = self._buildbasicXMLdoc()
+        textstag = doc.createElement("texts")
+        readcalls = doc.createElement("readCalls")
+        if self.readApiKey == None:
+            raise uClassifyError("Read API Key not Initialized")
+        readcalls.setAttribute("readApiKey",self.readApiKey)
+        root_element.appendChild(textstag)
+        root_element.appendChild(readcalls)
+        base64texts = []
+        for text in texts:
+            base64_text = base64.b64encode(text) #For Python version 3, need to change.
+            base64texts.append(base64_text)
+        counter = 1
+        for text in base64texts:
+            textbase64 = doc.createElement("textBase64")
+            classifytag = doc.createElement("classify")
+            textbase64.setAttribute("id","Classifytext"+ str(counter))
+            ptext = doc.createTextNode(text)
+            textbase64.appendChild(ptext)
+            classifytag.setAttribute("id","Classify"+ str(counter))
+            classifytag.setAttribute("classifierName",classifierName)
+            classifytag.setAttribute("textId","Classifytext"+str(counter))
+            if username != None:
+                classifytag.setAttribute("username",username)
+            textstag.appendChild(textbase64)
+            readcalls.appendChild(classifytag)
+            counter = counter + 1
+        r = requests.post(self.api_url,doc.toxml())
+        if r.status_code == 200:
+            success, status_code, text = self._getResponseCode(r.content)
+            if success == "false":
+                raise uClassifyError(text,status_code)
+            else:
+                return self.parseClassifyResponse(r.content,texts)
+        else:
+            raise uClassifyError("Bad XML Request Sent")
+
+    def parseClassifyResponse(self,content,texts):
+        """Parses the Classifier response from the server.
+           :param content: (required) XML Response from server.
+        """
+        print content
+        counter = 0
+        doc = xml.dom.minidom.parseString(content)
+        node = doc.documentElement
+        result = []
+        classifytags = node.getElementsByTagName("classification")
+        for classi in classifytags:
+            text_coverage = classi.getAttribute("textCoverage")
+            classtags = classi.getElementsByTagName("class")
+            cresult = []
+            for ctag in classtags:
+                classname = ctag.getAttribute("className")
+                cper = ctag.getAttribute("p")
+                tup = (classname,cper)
+                cresult.append(tup)
+            result.append((texts[counter],text_coverage,cresult))
+            counter = counter + 1
+        return result
             
+           
+        
 if __name__ == "__main__":
     a = uclassify()
     a.setWriteApiKey("fsqAft7Hs29BgAc1AWeCIWdGnY")
+    a.setReadApiKey("aD02ApbU29kNOG2xezDGXPEIck")
     #a.create("ManorWoma")
     #a.addClass(["man","woman"],"ManorWoma")
-    a.train(["dffddddddteddddxt1","teddddxfddddddddt2","taaaaffaaaaaedddddddddddddxt3"],"woman","ManorWoma")
+    #a.train(["dffddddddteddddxt1","teddddxfddddddddt2","taaaaffaaaaaedddddddddddddxt3"],"woman","ManorWoma")
+    d =a.classify(["hello","madam","bye"],"ManorWoma")
+    print d
