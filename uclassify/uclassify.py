@@ -94,7 +94,32 @@ class uclassify:
                 raise uClassifyError(text,status_code)
         else:
             raise uClassifyError("Bad XML Request Sent")
-     
+    
+    def removeClass(self,className,classifierName):
+        """Removes class from an existing Classifier.
+           :param className: (required) A List containing various classes that will be removed from the given Classifier.
+           :param classifierName: (required) Classifier
+        """
+        doc, root_element = self._buildbasicXMLdoc()
+        writecalls = doc.createElement("writeCalls")
+        if self.writeApiKey == None:
+            raise uClassifyError("Write API Key not Initialized")
+        writecalls.setAttribute("writeApiKey",self.writeApiKey)
+        writecalls.setAttribute("classifierName",classifierName)
+        root_element.appendChild(writecalls)
+        for clas in className:
+            addclass = doc.createElement("removeClass")
+            addclass.setAttribute("id","removeClass" + clas)
+            addclass.setAttribute("className",clas)
+            writecalls.appendChild(addclass)
+        r = requests.post(self.api_url,doc.toxml())
+        if r.status_code == 200:
+            success, status_code, text = self._getResponseCode(r.content)
+            if success == "false":
+                raise uClassifyError(text,status_code)
+        else:
+            raise uClassifyError("Bad XML Request Sent")
+    
     def train(self,texts,className,classifierName):
         """Performs training on a single classs.
            :param texts: (required) A List of text used up for training.
@@ -123,6 +148,46 @@ class uclassify:
             textbase64.appendChild(ptext)
             textstag.appendChild(textbase64)
             traintag.setAttribute("id","Train"+className+ str(counter))
+            traintag.setAttribute("className",className)
+            traintag.setAttribute("textId",className + "Text" + str(counter))
+            counter = counter + 1
+            writecalls.appendChild(traintag)
+        r = requests.post(self.api_url,doc.toxml())
+        if r.status_code == 200:
+            success, status_code, text = self._getResponseCode(r.content)
+            if success == "false":
+                raise uClassifyError(text,status_code)
+        else:
+            raise uClassifyError("Bad XML Request Sent")
+
+    def untrain(self,texts,className,classifierName):
+        """Performs untraining on text for a specific class.
+           :param texts: (required) A List of text used up for training.
+           :param className: (required) Name of the class.
+           :param classifierName: (required) Name of the Classifier
+        """
+        base64texts = []
+        for text in texts:
+            base64_text = base64.b64encode(text) #For Python version 3, need to change.
+            base64texts.append(base64_text)
+        doc,root_element = self._buildbasicXMLdoc()
+        textstag = doc.createElement("texts")
+        writecalls = doc.createElement("writeCalls")
+        if self.writeApiKey == None:
+            raise uClassifyError("Write API Key not Initialized")
+        writecalls.setAttribute("writeApiKey",self.writeApiKey)
+        writecalls.setAttribute("classifierName",classifierName)
+        root_element.appendChild(textstag)
+        root_element.appendChild(writecalls)
+        counter = 1
+        for text in base64texts:
+            textbase64 = doc.createElement("textBase64")
+            traintag = doc.createElement("untrain")
+            textbase64.setAttribute("id",className + "Text" + str(counter))
+            ptext = doc.createTextNode(text)
+            textbase64.appendChild(ptext)
+            textstag.appendChild(textbase64)
+            traintag.setAttribute("id","Untrain"+className+ str(counter))
             traintag.setAttribute("className",className)
             traintag.setAttribute("textId",className + "Text" + str(counter))
             counter = counter + 1
@@ -274,6 +339,9 @@ class uclassify:
             return result
     
     def getInformation(self,classifierName):
+        """Returns Information about the Classifier in a List.
+           :param classifierName: (required) Classifier Name
+        """
         doc,root_element = self._buildbasicXMLdoc()
         readcalls = doc.createElement("readCalls")
         if self.readApiKey == None:
@@ -309,6 +377,28 @@ class uclassify:
                 tc_data = totalc.firstChild.data
             result.append((cname,uf_data,tc_data))
         return result
+
+    def removeClassifier(self,classifierName):
+        """Removes Classifier.
+           :param classifierName(required): Classifier Name
+        """
+        doc,root_element = self._buildbasicXMLdoc()
+        writecalls = doc.createElement("writeCalls")
+        if self.writeApiKey == None:
+            raise uClassifyError("Write API Key not Initialized")
+        writecalls.setAttribute("writeApiKey",self.writeApiKey)
+        writecalls.setAttribute("classifierName",classifierName)
+        removetag = doc.createElement("remove")
+        removetag.setAttribute("id","Remove")
+        root_element.appendChild(writecalls)
+        writecalls.appendChild(removetag)
+        r = requests.post(self.api_url,doc.toxml())
+        if r.status_code == 200:
+            success, status_code, text = self._getResponseCode(r.content)
+            if success == "false":
+                raise uClassifyError(text,status_code)
+        else:
+            raise uClassifyError("Bad XML Request Sent")
             
     
 if __name__ == "__main__":
@@ -319,5 +409,6 @@ if __name__ == "__main__":
     #a.addClass(["man","woman"],"ManorWoma")
     #a.train(["dffddddddteddddxt1","teddddxfddddddddt2","taaaaffaaaaaedddddddddddddxt3"],"woman","ManorWoma")
     #d =a.classifyKeywords(["helloof the jungle","madam of the bses","bye jungli billi"],"ManorWoma")
-    d =a.getInformation("ManorWoma")
-    print d
+    #a.getInformation("ManorWoma")
+    #a.removeClassifier("Freak")
+    a.removeClass(["man"],"ManorWoma")
