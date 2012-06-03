@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/python
 
 from uclassify_endpoints import uclassify_http_status_codes
 
