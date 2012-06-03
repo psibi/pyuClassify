@@ -182,7 +182,6 @@ class uclassify:
         """Parses the Classifier response from the server.
            :param content: (required) XML Response from server.
         """
-        print content
         counter = 0
         doc = xml.dom.minidom.parseString(content)
         node = doc.documentElement
@@ -201,8 +200,117 @@ class uclassify:
             counter = counter + 1
         return result
             
-           
+    def classifyKeywords(self,texts,classifierName,username = None):
+        """Performs classification on texts.
+           :param texts: (required) A List of texts that needs to be classified.
+           :param classifierName: (required) Classifier Name
+           :param username: (optional): Name of the user, under whom the classifier exists.
+        """
+        doc,root_element = self._buildbasicXMLdoc()
+        textstag = doc.createElement("texts")
+        readcalls = doc.createElement("readCalls")
+        if self.readApiKey == None:
+            raise uClassifyError("Read API Key not Initialized")
+        readcalls.setAttribute("readApiKey",self.readApiKey)
+        root_element.appendChild(textstag)
+        root_element.appendChild(readcalls)
+        base64texts = []
+        for text in texts:
+            base64_text = base64.b64encode(text) #For Python version 3, need to change.
+            base64texts.append(base64_text)
+        counter = 1
+        for text in base64texts:
+            textbase64 = doc.createElement("textBase64")
+            classifytag = doc.createElement("classifyKeywords")
+            textbase64.setAttribute("id","Classifytext"+ str(counter))
+            ptext = doc.createTextNode(text)
+            textbase64.appendChild(ptext)
+            classifytag.setAttribute("id","Classify"+ str(counter))
+            classifytag.setAttribute("classifierName",classifierName)
+            classifytag.setAttribute("textId","Classifytext"+str(counter))
+            if username != None:
+                classifytag.setAttribute("username",username)
+            textstag.appendChild(textbase64)
+            readcalls.appendChild(classifytag)
+            counter = counter + 1
+        r = requests.post(self.api_url,doc.toxml())
+        if r.status_code == 200:
+            success, status_code, text = self._getResponseCode(r.content)
+            if success == "false":
+                raise uClassifyError(text,status_code)
+            else:
+                return self.parseClassifyResponse(r.content,texts)
+        else:
+            raise uClassifyError("Bad XML Request Sent")
         
+        def parseClassifyKeywordResponse(self,content,texts):
+            """Parses the Classifier response from the server.
+              :param content: (required) XML Response from server.
+            """
+            counter = 0
+            doc = xml.dom.minidom.parseString(content)
+            node = doc.documentElement
+            result = []
+            keyw = []
+            classifytags = node.getElementsByTagName("classification")
+            keywordstags = node.getElementsByTagName("keywords")
+            for keyword in keywordstags:
+                classtags = keyword.getElementsByTagName("class")
+                for ctag in classtags:
+                    kw = ctag.firstChild.data
+                if kw != "":
+                    keyw.append(kw)
+            for classi in classifytags:
+                text_coverage = classi.getAttribute("textCoverage")
+                classtags = classi.getElementsByTagName("class")
+                cresult = []
+                for ctag in classtags:
+                    classname = ctag.getAttribute("className")
+                    cper = ctag.getAttribute("p")
+                    tup = (classname,cper)
+                    cresult.append(tup)
+                result.append((texts[counter],text_coverage,cresult,keyw))
+                counter = counter + 1
+            return result
+    
+    def getInformation(self,classifierName):
+        doc,root_element = self._buildbasicXMLdoc()
+        readcalls = doc.createElement("readCalls")
+        if self.readApiKey == None:
+            raise uClassifyError("Read API Key not Initialized")
+        readcalls.setAttribute("readApiKey",self.readApiKey)
+        root_element.appendChild(readcalls)
+        getinfotag = doc.createElement("getInformation")
+        getinfotag.setAttribute("id","GetInformation")
+        getinfotag.setAttribute("classifierName",classifierName)
+        readcalls.appendChild(getinfotag)
+        r = requests.post(self.api_url,doc.toxml())
+        if r.status_code == 200:
+            success, status_code, text = self._getResponseCode(r.content)
+            if success == "false":
+                raise uClassifyError(text,status_code)
+            else:
+                return self._parseClassifierInformation(r.content)
+        else:
+            raise uClassifyError("Bad XML Request Sent")
+        
+    def _parseClassifierInformation(self,content):
+        doc = xml.dom.minidom.parseString(content)
+        node = doc.documentElement
+        classinfo = node.getElementsByTagName("classInformation")
+        result = []
+        for classes in classinfo:
+            cname = classes.getAttribute("className")
+            uf = classes.getElementsByTagName("uniqueFeatures")
+            tc = classes.getElementsByTagName("totalCount")
+            for uniquef in uf:
+                uf_data = uniquef.firstChild.data
+            for totalc in tc:
+                tc_data = totalc.firstChild.data
+            result.append((cname,uf_data,tc_data))
+        return result
+            
+    
 if __name__ == "__main__":
     a = uclassify()
     a.setWriteApiKey("fsqAft7Hs29BgAc1AWeCIWdGnY")
@@ -210,5 +318,6 @@ if __name__ == "__main__":
     #a.create("ManorWoma")
     #a.addClass(["man","woman"],"ManorWoma")
     #a.train(["dffddddddteddddxt1","teddddxfddddddddt2","taaaaffaaaaaedddddddddddddxt3"],"woman","ManorWoma")
-    d =a.classify(["hello","madam","bye"],"ManorWoma")
+    #d =a.classifyKeywords(["helloof the jungle","madam of the bses","bye jungli billi"],"ManorWoma")
+    d =a.getInformation("ManorWoma")
     print d
