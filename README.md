@@ -37,16 +37,17 @@ An example of how to use the API.
     	from uclassify import uclassify
 
     	a = uclassify()
-    	a.setWriteApiKey("fsqAft7Hs29BgAc1AWeCIWdGnY")
-    	a.setReadApiKey("aD02ApbU29kNOG2xezDGXPEIck")
+    	a.setWriteApiKey(WRITE_API_KEY)
+    	a.setReadApiKey(READ_API_KEY)
 	
     	a.create("ManorWoman") #Creates Classifier named "ManorWoman"
+
     	a.addClass(["man","woman"],"ManorWoman") #Adds two class named "man" and "woman" to the classifier "ManorWoman"
+
     	a.train(["Her hair is so nice!!","I wish I had more cosmetic.","I like those ice creams."],"woman","ManorWoman")
     	#The above function trains three sentences for the class "woman" on the classifier "ManorWoman"
     	
     	d = a.classify(["sample text1","sample text2"],"ManorWoman")
-
     	#Now the list d will contain the following value [('sample text1', u'0', [(u'man', u'0.5'), (u'woman', u'0.5')]), ('sample text2', u'0', [(u'man', u'0.5'), (u'woman', u'0.5')])]
 
 
