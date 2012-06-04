@@ -20,7 +20,7 @@ Installation:
 
 It is very easy to install pyuClassify.
 
-    	(pip install | easy_install) pyuclassify
+    	(pip install | easy_install) uclassify
 
 ... or in the traditional way:
 
