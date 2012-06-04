@@ -1,5 +1,27 @@
 #!/usr/bin/python
-
+# Copyright (C) 2012 Sibi <sibi@psibi.in>
+#
+# This file is part of pyuClassify.
+#
+# pyuClassify program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# pyuClassify program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# pyuClassify program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with pyuClassify.  If not, see <http://www.gnu.org/licenses/>.
+#
+# Author:   Sibi <sibi@psibi.in>
 from uclassify_endpoints import uclassify_http_status_codes
 
 class uClassifyError(Exception):
