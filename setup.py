@@ -4,7 +4,7 @@ from setuptools import setup
 from setuptools import find_packages
 
 __author__ = 'Sibi <sibi@psibi.in>'
-__version__ = '0.1.1'  #major.minor.micro
+__version__ = '0.1.2'  #major.minor.micro
 
 setup(
     # Basic package information.
@@ -25,7 +25,7 @@ setup(
     url='https://github.com/psibi/pyuClassify',
     keywords='uClassify API',
     description='Python Wrapper for accessing uClassify services',
-    long_description=open('README.rst').read(),
+    long_description=open('README.txt').read(),
     classifiers=[
         'Development Status :: 4 - Beta',
         'Intended Audience :: Developers',
