@@ -25,7 +25,7 @@
 
 from xml.dom.minidom import Document
 from time import gmtime, strftime
-from uclassify_eh import uClassifyError
+from .uclassify_eh import uClassifyError
 import xml.dom.minidom
 import requests
 import base64
@@ -151,7 +151,7 @@ class uclassify:
         """
         base64texts = []
         for text in texts:
-            base64_text = base64.b64encode(text) #For Python version 3, need to change.
+            base64_text = base64.b64encode(text.encode('utf-8'))
             base64texts.append(base64_text)
         doc,root_element = self._buildbasicXMLdoc()
         textstag = doc.createElement("texts")
@@ -167,7 +167,7 @@ class uclassify:
             textbase64 = doc.createElement("textBase64")
             traintag = doc.createElement("train")
             textbase64.setAttribute("id",className + "Text" + str(counter))
-            ptext = doc.createTextNode(text)
+            ptext = doc.createTextNode(text.decode('utf-8'))
             textbase64.appendChild(ptext)
             textstag.appendChild(textbase64)
             traintag.setAttribute("id","Train"+className+ str(counter))
@@ -191,7 +191,7 @@ class uclassify:
         """
         base64texts = []
         for text in texts:
-            base64_text = base64.b64encode(text) #For Python version 3, need to change.
+            base64_text = base64.b64encode(text.encode('utf-8'))
             base64texts.append(base64_text)
         doc,root_element = self._buildbasicXMLdoc()
         textstag = doc.createElement("texts")
@@ -207,7 +207,7 @@ class uclassify:
             textbase64 = doc.createElement("textBase64")
             traintag = doc.createElement("untrain")
             textbase64.setAttribute("id",className + "Text" + str(counter))
-            ptext = doc.createTextNode(text)
+            ptext = doc.createTextNode(text.decode('utf-8'))
             textbase64.appendChild(ptext)
             textstag.appendChild(textbase64)
             traintag.setAttribute("id","Untrain"+className+ str(counter))
@@ -239,14 +239,14 @@ class uclassify:
         root_element.appendChild(readcalls)
         base64texts = []
         for text in texts:
-            base64_text = base64.b64encode(text) #For Python version 3, need to change.
+            base64_text = base64.b64encode(text.encode('utf-8'))
             base64texts.append(base64_text)
         counter = 1
         for text in base64texts:
             textbase64 = doc.createElement("textBase64")
             classifytag = doc.createElement("classify")
             textbase64.setAttribute("id","Classifytext"+ str(counter))
-            ptext = doc.createTextNode(text)
+            ptext = doc.createTextNode(text.decode('utf-8'))
             textbase64.appendChild(ptext)
             classifytag.setAttribute("id","Classify"+ str(counter))
             classifytag.setAttribute("classifierName",classifierName)
@@ -304,14 +304,14 @@ class uclassify:
         root_element.appendChild(readcalls)
         base64texts = []
         for text in texts:
-            base64_text = base64.b64encode(text) #For Python version 3, need to change.
+            base64_text = base64.b64encode(text.encode('utf-8'))
             base64texts.append(base64_text)
         counter = 1
         for text in base64texts:
             textbase64 = doc.createElement("textBase64")
             classifytag = doc.createElement("classifyKeywords")
             textbase64.setAttribute("id","Classifytext"+ str(counter))
-            ptext = doc.createTextNode(text)
+            ptext = doc.createTextNode(text.decode('utf-8'))
             textbase64.appendChild(ptext)
             classifytag.setAttribute("id","Classify"+ str(counter))
             classifytag.setAttribute("classifierName",classifierName)
