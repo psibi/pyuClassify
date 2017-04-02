@@ -4,7 +4,7 @@ from setuptools import setup
 from setuptools import find_packages
 
 __author__ = 'Sibi <sibi@psibi.in>'
-__version__ = '0.1.2'  #major.minor.micro
+__version__ = '1.0.0'  #major.minor.micro
 
 setup(
     # Basic package information.
