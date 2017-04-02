@@ -22,7 +22,7 @@
 # along with pyuClassify.  If not, see <http://www.gnu.org/licenses/>.
 #
 # Author:   Sibi <sibi@psibi.in>
-from uclassify_endpoints import uclassify_http_status_codes
+from .uclassify_endpoints import uclassify_http_status_codes
 
 class uClassifyError(Exception):
     """
